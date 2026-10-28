@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safari do Dudu - Confirmação de Presença</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --safari-green: #2d5a27;
+            --safari-light-green: #486b36;
+            --safari-sand: #f4f1ea;
+            --safari-earth: #8b5a2b;
+            --safari-accent: #d4a373;
+        }
+
+        body {
+            background-color: var(--safari-sand);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .leaf-bg {
+            position: fixed;
+            top: -20px;
+            font-size: 2.5rem;
+            color: rgba(45, 90, 39, 0.15);
+            animation: floatLeaves 8s infinite ease-in-out;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .leaf-1 { left: 5%; animation-delay: 0s; }
+        .leaf-2 { left: 85%; animation-delay: 3s; }
+        .leaf-3 { left: 45%; animation-delay: 5s; }
+
+        @keyframes floatLeaves {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(20px) rotate(15deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        .main-card {
+            max-width: 650px;
+            margin: 40px auto;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(45, 90, 39, 0.15);
+            background: #ffffff;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            border: 2px solid #e0d8c3;
+        }
+
+        .header-safari {
+            background: linear-gradient(135deg, var(--safari-green), var(--safari-light-green));
+            color: white;
+            padding: 35px 20px;
+            text-align: center;
+            border-bottom: 5px solid var(--safari-accent);
+        }
+
+        .btn-config {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            transition: all 0.3s;
+        }
+
+        .btn-config:hover {
+            background: rgba(255, 255, 255, 0.4);
+            color: white;
+            transform: rotate(45deg);
+        }
+
+        .btn-safari {
+            background-color: var(--safari-green);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-safari:hover {
+            background-color: var(--safari-light-green);
+            color: white;
+        }
+
+        .gift-list-item {
+            background: #fdfbf7;
+            border: 1px solid #e8e2d5;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+
+<i class="fas fa-leaf leaf-bg leaf-1"></i>
+<i class="fas fa-paw leaf-bg leaf-2"></i>
+<i class="fas fa-leaf leaf-bg leaf-3"></i>
+
+<div class="container">
+    <div class="main-card">
+        <div class="header-safari position-relative">
+            <button class="btn btn-config" onclick="autenticarAdmin()" title="Painel Administrativo">
+                <i class="fas fa-cog fa-lg"></i>
+            </button>
+            <h1 class="fw-bold mb-1">🦁 Safari do Dudu 🦒</h1>
+            <p class="mb-0 text-warning fw-semibold">Confirme sua presença nesta aventura!</p>
+        </div>
+
+        <div class="p-4">
+            <!-- Form de Confirmação -->
+            <form id="formConfirmacao" class="mb-4">
+                <h4 class="mb-3 text-success fw-bold"><i class="fas fa-clipboard-check me-2"></i>Confirmação de Presença</h4>
+                
+                <div class="mb-3">
+                    <label for="nome" class="form-label fw-semibold">Nome Completo</label>
+                    <input type="text" class="form-control" id="nome" placeholder="Digite seu nome" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="telefone" class="form-label fw-semibold">Telefone / WhatsApp</label>
+                    <input type="tel" class="form-control" id="telefone" placeholder="(31) 99999-9999" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold d-block">Você é convidado de quem?</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="convidado_de" id="convPai" value="Pai - Paulo" required>
+                        <label class="form-check-label" for="convPai">Pai - Paulo</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="convidado_de" id="convMae" value="Mãe - Josi">
+                        <label class="form-check-label" for="convMae">Mãe - Josi</label>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label for="adultos" class="form-label fw-semibold">Qtd. Adultos TOTAL -INCLUINDO VOCÊ</label>
+                        <input type="number" class="form-control" id="adultos" min="1" value="1" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="criancas" class="form-label fw-semibold">Qtd. Crianças</label>
+                        <input type="number" class="form-control" id="criancas" min="0" value="0" required>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="btn btn-safari w-100 py-2 fs-5">
+                    <i class="fas fa-check-circle me-2"></i>Confirmar Presença
+                </button>
+            </form>
+
+            <div id="msgSucesso" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+                <i class="fas fa-check-circle me-2"></i> Presença confirmada com sucesso! Esperamos você no Safari do Dudu!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Lista de Presentes -->
+            <section id="secaoPresentes">
+                <h5 class="fw-bold text-success mb-2"><i class="fas fa-gift me-2"></i>Sugestões de Presentes</h5>
+                <p class="text-muted small mb-3">Sua presença é o nosso maior presente! Caso deseje nos agraciar, seguem algumas sugestões:</p>
+                
+                <div id="listaPresentesConvidado">
+                    <!-- Itens dinâmicos -->
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ADMINISTRATIVO ⚙️ -->
+<div class="modal fade" id="modalAdmin" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fas fa-user-shield me-2"></i>Painel Administrativo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="relatorio-tab" data-bs-toggle="tab" data-bs-target="#relatorio-pane" type="button">
+                            📊 Relatório de Convidados
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="presentes-tab" data-bs-toggle="tab" data-bs-target="#presentes-pane" type="button">
+                            🎁 Gerenciar Presentes
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content p-3 border border-top-0 rounded-bottom">
+                    <!-- ABA 1: Relatório -->
+                    <div class="tab-pane fade show active" id="relatorio-pane">
+                        <div class="row g-2 mb-3 text-center">
+                            <div class="col-md-3">
+                                <div class="p-2 bg-light rounded border border-primary">
+                                    <small class="text-muted d-block">Convidados do Pai</small>
+                                    <h5 class="mb-0 text-primary fw-bold" id="totalPai">0</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-2 bg-light rounded border border-danger">
+                                    <small class="text-muted d-block">Convidados da Mãe</small>
+                                    <h5 class="mb-0 text-danger fw-bold" id="totalMae">0</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-2 bg-light rounded border border-warning">
+                                    <small class="text-muted d-block">Total Adultos</small>
+                                    <h5 class="mb-0 text-warning fw-bold" id="totalAdultos">0</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-2 bg-light rounded border border-info">
+                                    <small class="text-muted d-block">Total Crianças</small>
+                                    <h5 class="mb-0 text-info fw-bold" id="totalCriancas">0</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Telefone</th>
+                                        <th>Convidado De</th>
+                                        <th class="text-center">Adultos</th>
+                                        <th class="text-center">Crianças</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaConvidados">
+                                    <!-- Carregado via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ABA 2: Presentes -->
+                    <div class="tab-pane fade" id="presentes-pane">
+                        <form id="formNovoPresente" class="row g-2 mb-3">
+                            <div class="col-8">
+                                <input type="text" class="form-control" id="novoPresenteNome" placeholder="Ex: Roupa tam. 2 anos" required>
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus me-1"></i>Adicionar</button>
+                            </div>
+                        </form>
+                        <ul class="list-group" id="listaAdminPresentes">
+                            <!-- Carregado via JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Configurações do Supabase
+    const SUPABASE_URL = "https://wtujaawfxmfqgvvwkjce.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_Tgu_ZkuqGcDdRxeisegrQQ_DU1-QKPx"; 
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", () => {
+        carregarPresentes();
+    });
+
+    // Salvar Confirmação de Presença
+    document.getElementById('formConfirmacao').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btnSubmit = document.getElementById('btnSubmit');
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Salvando...`;
+
+        const nome = document.getElementById('nome').value;
+        const telefone = document.getElementById('telefone').value;
+        const convidado_de = document.querySelector('input[name="convidado_de"]:checked').value;
+        const adultos = parseInt(document.getElementById('adultos').value) || 1;
+        const criancas = parseInt(document.getElementById('criancas').value) || 0;
+
+        const { data, error } = await supabaseClient
+            .from('confirmacoes')
+            .insert([{ nome, telefone, convidado_de, adultos, criancas }]);
+
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `<i class="fas fa-check-circle me-2"></i>Confirmar Presença`;
+
+        if (error) {
+            alert('Erro ao salvar presença: ' + error.message);
+        } else {
+            document.getElementById('msgSucesso').classList.remove('d-none');
+            this.reset();
+        }
+    });
+
+    // Autenticação do Modal ADM
+    function autenticarAdmin() {
+        const senha = prompt("Digite a senha de administrador:");
+        if (senha === "102104") {
+            const modalAdmin = new bootstrap.Modal(document.getElementById('modalAdmin'));
+            carregarRelatorio();
+            carregarPresentesAdmin();
+            modalAdmin.show();
+        } else if (senha !== null) {
+            alert("Senha incorreta!");
+        }
+    }
+
+    // Carregar Relatório de Convidados
+    async function carregarRelatorio() {
+        const { data, error } = await supabaseClient
+            .from('confirmacoes')
+            .select('*')
+            .order('id', { ascending: false });
+
+        const tabela = document.getElementById('tabelaConvidados');
+        if (error || !data) {
+            tabela.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhum registro encontrado ou erro na busca.</td></tr>';
+            return;
+        }
+
+        tabela.innerHTML = '';
+
+        let countPai = 0;
+        let countMae = 0;
+        let totalAdultos = 0;
+        let totalCriancas = 0;
+
+        data.forEach(item => {
+            const adultos = item.adultos || 1;
+            const criancas = item.criancas || 0;
+
+            totalAdultos += adultos;
+            totalCriancas += criancas;
+
+            const origem = item.convidado_de || '';
+            if (origem.includes('Pai') || origem.includes('Paulo')) countPai += (adultos + criancas);
+            if (origem.includes('Mãe') || origem.includes('Josi')) countMae += (adultos + criancas);
+
+            let badgeClass = "bg-secondary";
+            if (origem.includes('Pai') || origem.includes('Paulo')) badgeClass = "bg-primary";
+            else if (origem.includes('Mãe') || origem.includes('Josi')) badgeClass = "bg-danger";
+
+            tabela.innerHTML += `
+                <tr>
+                    <td><strong>${item.nome || '-'}</strong></td>
+                    <td>${item.telefone || '-'}</td>
+                    <td><span class="badge ${badgeClass}">${origem || 'Não especificado'}</span></td>
+                    <td class="text-center">${adultos}</td>
+                    <td class="text-center">${criancas}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('totalPai').innerText = countPai;
+        document.getElementById('totalMae').innerText = countMae;
+        document.getElementById('totalAdultos').innerText = totalAdultos;
+        document.getElementById('totalCriancas').innerText = totalCriancas;
+    }
+
+    // Carregar Presentes na tela do convidado
+    async function carregarPresentes() {
+        const { data, error } = await supabaseClient.from('sugestoes_presentes').select('*');
+        const container = document.getElementById('listaPresentesConvidado');
+        if (error || !data || data.length === 0) {
+            container.innerHTML = `<div class="gift-list-item"><i class="fas fa-gift text-warning me-3 fa-lg"></i><span>Sugestões em breve!</span></div>`;
+            return;
+        }
+        container.innerHTML = data.map(item => `
+            <div class="gift-list-item">
+                <i class="fas fa-gift text-warning me-3 fa-lg"></i>
+                <span>${item.descricao || ''}</span>
+            </div>
+        `).join('');
+    }
+
+    // Carregar Presentes na aba do Admin
+    async function carregarPresentesAdmin() {
+        const { data, error } = await supabaseClient.from('sugestoes_presentes').select('*');
+        const container = document.getElementById('listaAdminPresentes');
+        if (error || !data) return;
+        container.innerHTML = data.map(item => `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-gift text-warning me-2"></i>${item.descricao || ''}</span>
+                <button class="btn btn-sm btn-outline-danger" onclick="excluirPresente(${item.id})"><i class="fas fa-trash"></i></button>
+            </li>
+        `).join('');
+    }
+
+    // Evento de Adicionar Novo Presente (Mapeado para a coluna 'descricao')
+    document.getElementById('formNovoPresente').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const input = document.getElementById('novoPresenteNome');
+        const descricao = input.value;
+        
+        const { error } = await supabaseClient
+            .from('sugestoes_presentes')
+            .insert([{ descricao }]);
+
+        if (error) {
+            alert('Erro ao salvar sugestão: ' + error.message);
+            return;
+        }
+
+        input.value = '';
+        carregarPresentesAdmin();
+        carregarPresentes();
+    });
+
+    // Excluir Presente
+    async function excluirPresente(id) {
+        const { error } = await supabaseClient.from('sugestoes_presentes').delete().eq('id', id);
+        if (error) {
+            alert('Erro ao excluir: ' + error.message);
+            return;
+        }
+        carregarPresentesAdmin();
+        carregarPresentes();
+    }
+</script>
+</body>
+</html>
