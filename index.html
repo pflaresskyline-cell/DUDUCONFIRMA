@@ -209,6 +209,11 @@
                             🎁 Gerenciar Presentes
                         </button>
                     </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="configuracoes-tab" data-bs-toggle="tab" data-bs-target="#configuracoes-pane" type="button">
+                            ⚙️ Configurações
+                        </button>
+                    </li>
                 </ul>
 
                 <div class="tab-content p-3 border border-top-0 rounded-bottom">
@@ -273,6 +278,20 @@
                             <!-- Carregado via JS -->
                         </ul>
                     </div>
+
+                    <!-- ABA 3: Configurações -->
+                    <div class="tab-pane fade" id="configuracoes-pane">
+                        <h5 class="fw-bold text-success mb-3">Prazo para confirmação de presença</h5>
+                        <div class="mb-3">
+                            <label for="dataLimiteConfirmacao" class="form-label fw-semibold">Data limite para confirmar</label>
+                            <input type="date" class="form-control" id="dataLimiteConfirmacao">
+                            <small class="text-muted">Após essa data, novas confirmações serão bloqueadas automaticamente.</small>
+                        </div>
+                        <button type="button" class="btn btn-safari" onclick="salvarDataLimite()">
+                            <i class="fas fa-save me-2"></i>Salvar prazo
+                        </button>
+                        <div id="msgConfig" class="alert mt-3 d-none" role="alert"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -294,6 +313,30 @@
     // Salvar Confirmação de Presença
     document.getElementById('formConfirmacao').addEventListener('submit', async function(e) {
         e.preventDefault();
+
+        // Verifica o prazo diretamente no banco antes de aceitar a confirmação.
+        const { data: configuracao, error: erroConfig } = await supabaseClient
+            .from('configuracoes')
+            .select('data_limite')
+            .eq('id', 1)
+            .maybeSingle();
+
+        if (erroConfig) {
+            alert('Não foi possível verificar o prazo de confirmação. Tente novamente.');
+            return;
+        }
+
+        if (configuracao && configuracao.data_limite) {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            const partesData = configuracao.data_limite.split('-').map(Number);
+            const dataLimite = new Date(partesData[0], partesData[1] - 1, partesData[2]);
+            if (hoje > dataLimite) {
+                alert('NÃO CONFIRMADO, DATA DE PRESENÇA ACABOU, CONVITE JA TRANSFERIDO PARA OUTRA PESSOA, OBRIGADO!');
+                return;
+            }
+        }
+
         const btnSubmit = document.getElementById('btnSubmit');
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Salvando...`;
@@ -326,6 +369,7 @@
             const modalAdmin = new bootstrap.Modal(document.getElementById('modalAdmin'));
             carregarRelatorio();
             carregarPresentesAdmin();
+            carregarConfiguracoes();
             modalAdmin.show();
         } else if (senha !== null) {
             alert("Senha incorreta!");
@@ -432,6 +476,47 @@
         carregarPresentesAdmin();
         carregarPresentes();
     });
+
+    // Carregar configurações do prazo de confirmação
+    async function carregarConfiguracoes() {
+        const campo = document.getElementById('dataLimiteConfirmacao');
+        const { data, error } = await supabaseClient
+            .from('configuracoes')
+            .select('data_limite')
+            .eq('id', 1)
+            .maybeSingle();
+
+        if (error) {
+            mostrarMensagemConfig('Erro ao carregar o prazo. Verifique a tabela configuracoes no Supabase.', 'danger');
+            return;
+        }
+        campo.value = data && data.data_limite ? data.data_limite : '';
+    }
+
+    // Salvar data limite editável pelo administrador
+    async function salvarDataLimite() {
+        const data_limite = document.getElementById('dataLimiteConfirmacao').value;
+        if (!data_limite) {
+            mostrarMensagemConfig('Selecione uma data antes de salvar.', 'warning');
+            return;
+        }
+
+        const { error } = await supabaseClient
+            .from('configuracoes')
+            .upsert({ id: 1, data_limite }, { onConflict: 'id' });
+
+        if (error) {
+            mostrarMensagemConfig('Erro ao salvar prazo: ' + error.message, 'danger');
+            return;
+        }
+        mostrarMensagemConfig('Prazo de confirmação salvo com sucesso!', 'success');
+    }
+
+    function mostrarMensagemConfig(mensagem, tipo) {
+        const msg = document.getElementById('msgConfig');
+        msg.className = 'alert alert-' + tipo + ' mt-3';
+        msg.textContent = mensagem;
+    }
 
     // Excluir Presente
     async function excluirPresente(id) {
